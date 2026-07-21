@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+backend/.env
+backend/essay.db
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# misc
+.DS_Store
