@@ -8,6 +8,8 @@ const CATEGORIES = [
   { id: "sisa", label: "시사" },
 ];
 
+const MIN_ANSWER_LEN = 50;
+
 const COLS = ["A", "B", "C", "D"];
 const COL_WIDTHS = { A: 44, B: 520, C: 130, D: 220 };
 const HEADERS = { A: "번호", B: "제목", C: "출처", D: "시간" };
@@ -152,7 +154,7 @@ export default function App() {
   }
 
   async function submitAnswer() {
-    if (!session || !answer.trim()) return;
+    if (!session || answer.trim().length < MIN_ANSWER_LEN) return;
     setSubmitting(true);
     setError("");
     try {
@@ -259,7 +261,7 @@ export default function App() {
               </button>
             )}
             {session && !feedback && (
-              <button className="xl-rb xl-submit-btn" onClick={submitAnswer} disabled={submitting || !answer.trim()}>
+              <button className="xl-rb xl-submit-btn" onClick={submitAnswer} disabled={submitting || answer.trim().length < MIN_ANSWER_LEN}>
                 {submitting ? "제출 중…" : "제출"}
               </button>
             )}
@@ -359,6 +361,9 @@ export default function App() {
                   disabled={submitting}
                 />
                 <div className="xl-answer-count">
+                  {answer.trim().length < MIN_ANSWER_LEN && (
+                    <span className="xl-muted">최소 {MIN_ANSWER_LEN}자 이상 작성해야 제출할 수 있습니다 · </span>
+                  )}
                   <span className={answer.length > session.char_limit ? "xl-over" : "xl-muted"}>
                     {answer.length} / {session.char_limit}자
                   </span>

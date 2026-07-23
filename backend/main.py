@@ -120,12 +120,18 @@ class SubmitRequest(BaseModel):
     answer: str
 
 
+_MIN_ANSWER_LEN = 50
+
+
 @app.post("/api/submit")
 async def submit(req: SubmitRequest):
     if not AI_ENABLED:
         raise HTTPException(503, "AI가 비활성화 상태입니다.")
-    if not req.answer.strip():
+    answer = req.answer.strip()
+    if not answer:
         raise HTTPException(400, "답안을 작성해주세요.")
+    if len(answer) < _MIN_ANSWER_LEN:
+        raise HTTPException(400, f"답안이 너무 짧습니다. 최소 {_MIN_ANSWER_LEN}자 이상 작성해주세요. (현재 {len(answer)}자)")
     db = await get_db()
     try:
         cur = await db.execute("SELECT * FROM essay_sessions WHERE id=?", (req.session_id,))
@@ -141,7 +147,7 @@ async def submit(req: SubmitRequest):
         try:
             async with _gemini_sem:
                 feedback = await asyncio.get_event_loop().run_in_executor(
-                    None, grade_essay, sess["news_title"], sess["news_summary"], sess["question"], req.answer
+                    None, grade_essay, sess["news_title"], sess["news_summary"], sess["question"], answer
                 )
         except Exception as e:
             raise HTTPException(503, f"첨삭 실패: {e}")
@@ -149,7 +155,7 @@ async def submit(req: SubmitRequest):
 
         await db.execute(
             "UPDATE essay_sessions SET user_answer=?, feedback=?, submitted_at=datetime('now') WHERE id=?",
-            (req.answer, feedback, req.session_id),
+            (answer, feedback, req.session_id),
         )
         await db.commit()
         return {"feedback": feedback}

@@ -107,7 +107,9 @@ def generate_essay_question(title: str, desc: str) -> dict:
         raise RuntimeError(f"논제 생성 실패: {e}") from e
 
 
-_ESSAY_FEEDBACK_SYSTEM = """당신은 채용 필기 논술시험 첨삭 전문가입니다. 공정하고 구체적인 근거를 들어 첨삭하십시오."""
+_ESSAY_FEEDBACK_SYSTEM = """당신은 채용 필기 논술시험 첨삭 전문가입니다. 공정하고 구체적인 근거를 들어 첨삭하십시오.
+답안이 논제와 무관하거나, 실질적인 주장·근거 없이 단어만 나열하거나, 성의 없이 짧게 때우려 한 경우
+절대 좋게 포장하지 말고 낮은 점수(총점 20점 미만)를 주고 그 이유를 명확히 지적하십시오."""
 
 
 def _essay_feedback_prompt(news_title: str, news_desc: str, question: str, answer: str) -> str:
@@ -122,6 +124,10 @@ def _essay_feedback_prompt(news_title: str, news_desc: str, question: str, answe
 {answer}
 
 위 답안을 실제 채용 논술시험 채점 기준으로 첨삭해주세요. 아래 구조를 마크다운으로 작성하세요:
+
+먼저 답안이 논제에 실질적으로 답하고 있는지 판단하세요. 논제와 무관하거나 내용이 거의 없다면
+"## 총점"을 20점 미만으로 매기고, "잘된 점"에 억지로 칭찬거리를 만들어내지 마세요
+(정말 없으면 "특별히 평가할 내용이 없습니다"라고 쓰세요).
 
 ## 총점: X/100
 
