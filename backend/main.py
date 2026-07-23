@@ -120,18 +120,11 @@ class SubmitRequest(BaseModel):
     answer: str
 
 
-_MIN_ANSWER_LEN = 50
-
-
 @app.post("/api/submit")
 async def submit(req: SubmitRequest):
     if not AI_ENABLED:
         raise HTTPException(503, "AI가 비활성화 상태입니다.")
     answer = req.answer.strip()
-    if not answer:
-        raise HTTPException(400, "답안을 작성해주세요.")
-    if len(answer) < _MIN_ANSWER_LEN:
-        raise HTTPException(400, f"답안이 너무 짧습니다. 최소 {_MIN_ANSWER_LEN}자 이상 작성해주세요. (현재 {len(answer)}자)")
     db = await get_db()
     try:
         cur = await db.execute("SELECT * FROM essay_sessions WHERE id=?", (req.session_id,))
